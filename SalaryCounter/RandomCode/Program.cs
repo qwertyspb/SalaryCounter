@@ -41,6 +41,4 @@ internal class Program
                 accountingType = Logic.GetAccountingType();
         }
     }
-
-
 }
