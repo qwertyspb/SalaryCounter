@@ -4,6 +4,8 @@
     {
         internal static IncomingValues GetIncomingValues(IncomingValues incomingValues)
         {
+            incomingValues.CompanyProfit = null;
+
             Console.Write("Would you like to use detailed salary calculation? (y/n): ");
 
             var y = Console.ReadLine();
@@ -108,25 +110,27 @@
             Console.Write("Do you want to exit (y/n): ");
             var y = Console.ReadLine();
 
+            Console.WriteLine();
+
             return IsYes(y);
         }
 
         internal static bool AskForNewCalculationType()
         {
-            Console.WriteLine();
-
             Console.Write("Do you want to switch calculation type (y/n): ");
             var y = Console.ReadLine();
+
+            Console.WriteLine();
 
             return IsYes(y);
         }
 
         internal static bool AskForDetailedCalculation()
         {
-            Console.WriteLine();
-
             Console.Write("Do you want to change for detailed/non-detailed salary calculation? (y/n): ");
             var y = Console.ReadLine();
+
+            Console.WriteLine();
 
             return IsYes(y);
         }

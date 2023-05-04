@@ -37,14 +37,14 @@ internal class Program
             if (Logic.AskForExit())
                 break;
 
-            else if (Logic.AskForNewCalculationType())
-                calculationType = Logic.GetCalculationType();
-
             else if (Logic.AskForDetailedCalculation())
             {
                 incomingValues = Logic.GetIncomingValues(incomingValues);
                 calculationType = Logic.GetCalculationType();
             }
+
+            else if (Logic.AskForNewCalculationType())
+                calculationType = Logic.GetCalculationType();
         }
     }
 }
