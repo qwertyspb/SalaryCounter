@@ -2,14 +2,27 @@
 {
     internal class Logic
     {
-        internal static AccountingType GetAccountingType()
+        internal static IncomingValues GetIncomingValues(IncomingValues incomingValues)
+        {
+            Console.Write("Would you like to use detailed salary calculation? (y/n): ");
+
+            var y = Console.ReadLine();
+
+            Console.WriteLine();
+
+            return IsYes(y)
+                ? SetDetailedIncomingValues(incomingValues)
+                : ChangeIncomingValues(incomingValues);
+        }
+
+        internal static CalculationType GetCalculationType()
         {
             bool c;
             bool w;
 
             while (true)
             {
-                Console.Write("Choose your variant of accounting.\r\nType \"c\" for \"via company profit\" or \"w\" for \"via working hour amount\": ");
+                Console.Write("Choose your variant of calculation.\r\nType \"c\" for \"via company profit\" or \"w\" for \"via working hour amount\": ");
                 var appType = Console.ReadLine();
 
                 c = appType.Equals("c", StringComparison.OrdinalIgnoreCase);
@@ -24,35 +37,33 @@
             }
 
             if (c)
-                return AccountingType.ViaCompanyProfit;
+                return CalculationType.ViaCompanyProfit;
 
-            return AccountingType.ViaWorkingHourAmount;
+            return CalculationType.ViaWorkingHourAmount;
         }
 
         internal static void CountViaCompanyProfit(IncomingValues incomingValues)
         {
-            Console.Write("Write down the company profit: ");
-            var income = Console.ReadLine();
-
             double companyProfit;
 
-            try
+            if (!incomingValues.CompanyProfit.HasValue)
             {
-                companyProfit = double.Parse(income);
+                Console.Write("Write down the company profit: ");
+                var income = Console.ReadLine();
+
+                try
+                {
+                    companyProfit = double.Parse(income);
+                }
+
+                catch
+                {
+                    return;
+                }
             }
 
-            catch
-            {
-                return;
-            }
-
-            var percent = companyProfit switch
-            {
-                < 300000 => 0,
-                < 1000000 => 5,
-                < 2000000 => 10,
-                _ => 15
-            };
+            else
+                companyProfit = incomingValues.CompanyProfit.Value;
 
             var bonus = GetBonus(companyProfit);
 
@@ -100,17 +111,27 @@
             return IsYes(y);
         }
 
-        internal static bool AskForNewAccountingType()
+        internal static bool AskForNewCalculationType()
         {
             Console.WriteLine();
 
-            Console.Write("Do you want to switch accounting type (y/n): ");
+            Console.Write("Do you want to switch calculation type (y/n): ");
             var y = Console.ReadLine();
 
             return IsYes(y);
         }
 
-        internal static IncomingValues ChangeIncomingValues(IncomingValues incomingValues)
+        internal static bool AskForDetailedCalculation()
+        {
+            Console.WriteLine();
+
+            Console.Write("Do you want to change for detailed/non-detailed salary calculation? (y/n): ");
+            var y = Console.ReadLine();
+
+            return IsYes(y);
+        }
+
+        private static IncomingValues ChangeIncomingValues(IncomingValues incomingValues)
         {
             var consts = new List<string>
             {
@@ -118,7 +139,8 @@
                 $"{Consts.Salary}{incomingValues.Salary}",
                 $"{Consts.Course}{incomingValues.CurrentCourse}",
                 $"{Consts.Price}{incomingValues.AveragePriceForHour}",
-                $"{Consts.Shifts}{incomingValues.ShiftsInMonth}"
+                $"{Consts.Shifts}{incomingValues.ShiftsInMonth}",
+                $"{Consts.Profit}{incomingValues.CompanyProfit}"
             };
 
             Console.WriteLine(string.Join("\r\n", consts));
@@ -137,9 +159,9 @@
             return ChangeIncomingValues(incomingValues);
         }
 
-        internal static IncomingValues SetIncomingValues(IncomingValues incomingValues)
+        private static IncomingValues SetIncomingValues(IncomingValues incomingValues)
         {
-            Console.WriteLine("Set constants in turn. If current constant is ok for you, skip with pressing \"Enter\".");
+            Console.WriteLine("Set constants in turn. If current constant is ok for you, skip by pressing \"Enter\".");
 
             var dictionary = new Dictionary<IncomingValueType, string>
             {
@@ -151,29 +173,10 @@
 
             foreach (var (key, param) in dictionary)
             {
-                Console.Write(param);
+                var value = GetParsedIncomeForParam(param);
 
-                var income = Console.ReadLine();
-
-                if (string.IsNullOrEmpty(income))
+                if (value < 0)
                     continue;
-
-                var isUnparsed = true;
-                double value = 0;
-
-                while (isUnparsed)
-                {
-                    isUnparsed = !TryParse(income, out var output);
-                    value = output;
-
-                    if (isUnparsed)
-                    {
-                        Console.WriteLine("Write down the correct value.");
-
-                        Console.Write(param);
-                        income = Console.ReadLine();
-                    }
-                }
 
                 switch (key)
                 {
@@ -194,13 +197,79 @@
                         break;
 
                     default:
-                        throw new Exception("Unexpected constant type");
+                        throw new Exception("Unexpected constant type.");
                 }
             }
 
             Console.WriteLine();
 
             return incomingValues;
+        }
+
+        private static IncomingValues SetDetailedIncomingValues(IncomingValues incomingValues)
+        {
+            incomingValues.Salary = 0;
+            var hours = new List<double>();
+
+            incomingValues.ShiftsInMonth = GetParsedIncomeForParam(Consts.Shifts);
+
+            Console.WriteLine("Write down the amount of work hours.");
+
+            for (var i = 1;  i <= incomingValues.ShiftsInMonth; i++)
+            {
+                var workHours = GetParsedIncomeForParam($"Shift number {i}: ");
+
+                hours.Add(workHours);
+
+                var daySalary = Consts.DaySalary;
+
+                if (workHours <= Consts.HalfHoursOfShift)
+                {
+                    Console.Write($"Was it a full day? (y/n): ");
+
+                    var y = Console.ReadLine();
+
+                    if (!IsYes(y))
+                        daySalary /= 2;
+                }
+
+                incomingValues.Salary += daySalary;
+            }
+
+            incomingValues.CompanyProfit = incomingValues.AveragePriceForHour * hours.Sum();
+
+            Console.WriteLine();
+
+            return ChangeIncomingValues(incomingValues);
+        }
+
+        private static double GetParsedIncomeForParam(string param)
+        {
+            Console.Write(param);
+
+            var income = Console.ReadLine();
+
+            if (string.IsNullOrEmpty(income))
+                return -1;
+
+            var isUnparsed = true;
+            double value = 0;
+
+            while (isUnparsed)
+            {
+                isUnparsed = !TryParse(income, out var output);
+                value = output;
+
+                if (isUnparsed)
+                {
+                    Console.WriteLine("Write down the correct value.");
+
+                    Console.Write(param);
+                    income = Console.ReadLine();
+                }
+            }
+
+            return value;
         }
 
         private static bool IsYes(string y)

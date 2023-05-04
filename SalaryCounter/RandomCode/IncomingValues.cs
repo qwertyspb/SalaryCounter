@@ -9,5 +9,7 @@
         internal double AveragePriceForHour { get; set; }
 
         internal double ShiftsInMonth { get; set; }
+
+        internal double? CompanyProfit { get; set; }
     }
 }

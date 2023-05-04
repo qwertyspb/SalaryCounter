@@ -12,21 +12,21 @@ internal class Program
             ShiftsInMonth = 15
         };
 
-        incomingValues = Logic.ChangeIncomingValues(incomingValues);
+        incomingValues = Logic.GetIncomingValues(incomingValues);
 
-        var accountingType = Logic.GetAccountingType();
+        var calculationType = Logic.GetCalculationType();
 
         while (true)
         {
             Console.WriteLine();
 
-            switch (accountingType)
+            switch (calculationType)
             {
-                case AccountingType.ViaCompanyProfit:
+                case CalculationType.ViaCompanyProfit:
                     Logic.CountViaCompanyProfit(incomingValues);
                     break;
 
-                case AccountingType.ViaWorkingHourAmount:
+                case CalculationType.ViaWorkingHourAmount:
                     Logic.CountViaWorkingHourAmount(incomingValues);
                     break;
 
@@ -37,8 +37,14 @@ internal class Program
             if (Logic.AskForExit())
                 break;
 
-            if (Logic.AskForNewAccountingType())
-                accountingType = Logic.GetAccountingType();
+            else if (Logic.AskForNewCalculationType())
+                calculationType = Logic.GetCalculationType();
+
+            else if (Logic.AskForDetailedCalculation())
+            {
+                incomingValues = Logic.GetIncomingValues(incomingValues);
+                calculationType = Logic.GetCalculationType();
+            }
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace RandomCode
 {
-    internal enum AccountingType
+    internal enum CalculationType
     {
         ViaCompanyProfit,
         ViaWorkingHourAmount
