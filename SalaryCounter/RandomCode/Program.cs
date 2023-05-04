@@ -7,8 +7,8 @@ internal class Program
         var incomingValues = new IncomingValues
         {
             Salary = 150000,
-            CurrentCourse = 5.5,
-            AveragePriceForHour = 13000,
+            CurrentCourse = 5.6,
+            AveragePriceForHour = 14800,
             ShiftsInMonth = 15
         };
 
