@@ -5,17 +5,17 @@
         internal static AccountingType GetAccountingType()
         {
             bool c;
-            bool p;
+            bool w;
 
             while (true)
             {
-                Console.Write("Choose your variant of accounting.\r\nType \"c\" for \"via company profit\" or \"p\" for \"via procedure amount\": ");
+                Console.Write("Choose your variant of accounting.\r\nType \"c\" for \"via company profit\" or \"w\" for \"via working hour amount\": ");
                 var appType = Console.ReadLine();
 
                 c = appType.Equals("c", StringComparison.OrdinalIgnoreCase);
-                p = appType.Equals("p", StringComparison.OrdinalIgnoreCase);
+                w = appType.Equals("w", StringComparison.OrdinalIgnoreCase);
 
-                if (c || p)
+                if (c || w)
                     break;
 
                 Console.WriteLine();
