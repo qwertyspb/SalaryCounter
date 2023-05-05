@@ -223,6 +223,12 @@
             {
                 var workHours = GetParsedIncomeForParam($"Shift number {i}: ");
 
+                if (workHours < 0)
+                {
+                    i -= 1;
+                    continue;
+                }
+
                 hours.Add(workHours);
 
                 var daySalary = Consts.DaySalary;
